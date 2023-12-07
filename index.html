@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Profile Explorer</title>
+    <link rel="icon" type="image/png" href="https://github.com/fluidicon.png"> <!-- GitHub Favicon -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #24292e;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .profile-section,
+        .org-section,
+        .user-repositories,
+        .org-repositories {
+            text-align: center;
+            padding: 20px;
+            margin: 20px;
+        }
+
+        .profile-image {
+            width: 150px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .profile-image:hover {
+            transform: scale(1.1);
+        }
+
+        .details-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        .repository-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .repository-list-item {
+            margin: 10px 0;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .repository-list-item:hover {
+            transform: scale(1.05);
+        }
+
+        .details-section p {
+            margin: 8px 0;
+        }
+
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .section-title {
+            color: #24292e;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .code-like {
+            font-family: 'Courier New', Courier, monospace;
+            color: green;
+            font-weight: bold;
+        }
+
+        .github-member-since {
+            color: red;
+        }
+
+        .location {
+            font-weight: normal;
+        }
+
+        .location-text {
+            color: green;
+            font-weight: bold;
+        }
+
+        #footer {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            background-color: #24292e;
+            color: white;
+        }
+
+        #showDetailsBtn,
+        #showDetailsBtnFooter {
+            margin: 20px auto;
+            padding: 5px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        GitHub Profile Explorer
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto profile-section" id="profileSection">
+                <h2 class="section-title">User Profile Details</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mx-auto user-repositories" id="userRepositories">
+                <h2 class="section-title">User Repositories</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mx-auto org-section" id="orgSection">
+                <h2 class="section-title">Organization Details</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mx-auto org-repositories" id="orgRepositories">
+                <h2 class="section-title">Organization Repositories</h2>
+            </div>
+        </div>
+    </div>
+
+    <button id="showDetailsBtn"> 😃 </button>
+    <div id="footer">
+        <p>
+            GitHub Profile Explorer<br>
+            Created by Kamrul Hossain<br>
+            <a href="https://github.com/kamrullab" target="_blank">GitHub</a><br>
+            <a href="https://m.me/elitekamrul" target="_blank">Facebook</a><br>
+            Version 0.1
+        </p>
+        <button id="showDetailsBtnFooter"> 😭 </button>
+    </div>
+
+    <script>
+        const username = 'kamrullab';
+        const orgName = 'google';
+
+        function createRedDateElement(dateString) {
+            const redDateElement = document.createElement('span');
+            redDateElement.textContent = new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            redDateElement.classList.add('github-member-since');
+            return redDateElement;
+        }
+
+        function createSection(container, data, isUser = true) {
+            const image = document.createElement('img');
+            image.src = data.avatar_url;
+            image.alt = `${isUser ? 'Profile' : 'Organization'} Image`;
+            image.className = 'profile-image img-fluid';
+
+            const nameElement = document.createElement('h1');
+            nameElement.textContent = data.name || data.login;
+            nameElement.classList.add('code-like');
+
+            const bioElement = document.createElement('p');
+            bioElement.textContent = data.bio !== null && data.bio !== undefined ? data.bio : `No ${
+                isUser ? 'user' : 'organization'
+            } bio available.`;
+
+            const locationElement = document.createElement('p');
+            locationElement.innerHTML = `Location: <span class="location-text">${data.location || 'Not specified.'}</span>`;
+
+            const websiteElement = document.createElement('p');
+            websiteElement.innerHTML = `Website: <a href="${data.blog || '#'}">${data.blog || 'Not specified.'}</a>`;
+
+            const createdAtElement = document.createElement('p');
+            createdAtElement.innerHTML = `<span style="color: black; font-weight: normal;">GitHub Member Since:</span> `;
+            createdAtElement.appendChild(createRedDateElement(data.created_at));
+            createdAtElement.classList.add('code-like');
+
+            const linkElement = document.createElement('a');
+            linkElement.href = data.html_url;
+            linkElement.textContent = `Visit GitHub ${isUser ? 'Profile' : 'Organization'}`;
+
+            const detailsContainer = document.createElement('div');
+            detailsContainer.className = 'details-section';
+            detailsContainer.appendChild(image);
+            detailsContainer.appendChild(nameElement);
+            detailsContainer.appendChild(bioElement);
+            detailsContainer.appendChild(locationElement);
+            detailsContainer.appendChild(websiteElement);
+            detailsContainer.appendChild(createdAtElement);
+            detailsContainer.appendChild(linkElement);
+
+            container.appendChild(detailsContainer);
+        }
+
+        function createRepositories(container, repos) {
+            repos.forEach(repo => {
+                const listItem = document.createElement('div');
+                listItem.className = 'repository-list-item';
+                listItem.innerHTML = `
+                    <h3>${repo.name}</h3>
+                    <p>${repo.description || 'No description available.'}</p>
+                    <a href="${repo.html_url}" target="_blank">Visit Repository</a>
+                `;
+                container.appendChild(listItem);
+            });
+        }
+
+        Promise.all([
+                fetch(`https://api.github.com/users/${username}`).then(response => response.json()),
+                fetch(`https://api.github.com/orgs/${orgName}`).then(response => response.json()),
+                fetch(`https://api.github.com/users/${username}/repos`).then(response => response.json()),
+                fetch(`https://api.github.com/orgs/${orgName}/repos`).then(response => response.json())
+            ])
+            .then(([userData, orgData, userReposData, orgReposData]) => {
+                createSection(document.getElementById('profileSection'), userData);
+                createRepositories(document.getElementById('userRepositories'), userReposData);
+
+                // Check if organization data is available
+                if (orgData.login) {
+                    // Add GitHub organization information
+                    const orgImage = document.createElement('img');
+                    orgImage.src = orgData.avatar_url;
+                    orgImage.alt = 'Organization Image';
+                    orgImage.className = 'profile-image img-fluid';
+
+                    const orgNameElement = document.createElement('h1');
+                    orgNameElement.textContent = orgData.name || orgData.login;
+                    orgNameElement.classList.add('code-like'); // Apply code-like styling
+
+                    const orgDescription = document.createElement('p');
+                    orgDescription.textContent = orgData.description !== null && orgData.description !== undefined ? orgData.description : `No organization bio available.`;
+
+                    const orgLocationElement = document.createElement('p');
+                    orgLocationElement.innerHTML = `Location: <span class="location-text">${orgData.location || 'Not specified.'}</span>`;
+
+                    const orgContactElement = document.createElement('p');
+                    orgContactElement.innerHTML = `Contact: <a href="mailto:${orgData.email || '#'}">${orgData.email || 'Not specified.'}</a>`;
+
+                    const orgMemberSinceElement = document.createElement('p');
+                    const orgMemberSinceDate = new Date(orgData.created_at);
+                    orgMemberSinceElement.innerHTML = `<span style="color: black; font-weight: normal;">GitHub Member Since:</span> <span class="github-member-since">${orgMemberSinceDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>`;
+                    orgMemberSinceElement.classList.add('code-like'); // Apply code-like styling
+
+                    const orgDetailsContainer = document.createElement('div');
+                    orgDetailsContainer.className = 'details-section';
+                    orgDetailsContainer.appendChild(orgImage);
+                    orgDetailsContainer.appendChild(orgNameElement);
+                    orgDetailsContainer.appendChild(orgDescription);
+                    orgDetailsContainer.appendChild(orgLocationElement);
+                    orgDetailsContainer.appendChild(orgContactElement);
+                    orgDetailsContainer.appendChild(orgMemberSinceElement);
+                    orgSection.appendChild(orgDetailsContainer);
+                }
+
+                createRepositories(document.getElementById('orgRepositories'), orgReposData);
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
+        document.getElementById('showDetailsBtn').addEventListener('click', function () {
+            const footer = document.getElementById('footer');
+            footer.style.display = (footer.style.display === 'none' || footer.style.display === '') ? 'block' : 'none';
+        });
+
+        document.getElementById('showDetailsBtnFooter').addEventListener('click', function () {
+            const footer = document.getElementById('footer');
+            footer.style.display = (footer.style.display === 'none' || footer.style.display === '') ? 'block' : 'none';
+        });
+    </script>
+
+</body>
+
+</html>
